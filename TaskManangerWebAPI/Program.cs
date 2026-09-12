@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Scalar.AspNetCore;
 using TaskManangerWebAPI.Data;
 var builder = WebApplication.CreateBuilder(args);
@@ -14,9 +15,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Connection String ကို Environment Variable မှ ယူမည်
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
                        ?? builder.Configuration["ConnectionStrings:DefaultConnection"];
-// Npgsql (PostgreSQL) သို့ ပြောင်းမည်
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(connectionString));
+    options.UseNpgsql(connectionString)
+           .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning)));
+// Npgsql (PostgreSQL) သို့ ပြောင်းမည်
+//builder.Services.AddDbContext<AppDbContext>(options =>
+//    options.UseNpgsql(connectionString));
 // --- CORS Policy ထည့်သွင်းခြင်း (စတင်ရန်) ---
 //builder.Services.AddCors(options =>
 //{
