@@ -1,14 +1,22 @@
-﻿using Microsoft.EntityFrameworkCore;
-using TaskManangerWebAPI.Data;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using TaskManangerWebAPI.Data;
 var builder = WebApplication.CreateBuilder(args);
 //builder.Services.AddDbContext<AppDbContext>(options =>
 //    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // မူလ SQL Server သို့မဟုတ် UseSqlServer ရေးထားသည်ကို ခေတ္တ ပိတ်/ပြောင်းပါ
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseInMemoryDatabase("TaskManagerDb"));
+//builder.Services.AddDbContext<AppDbContext>(options =>
+//    options.UseInMemoryDatabase("TaskManagerDb"));
 
+
+// Connection String ကို Environment Variable မှ ယူမည်
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+                       ?? builder.Configuration["ConnectionStrings:DefaultConnection"];
+// Npgsql (PostgreSQL) သို့ ပြောင်းမည်
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(connectionString));
 // --- CORS Policy ထည့်သွင်းခြင်း (စတင်ရန်) ---
 //builder.Services.AddCors(options =>
 //{
@@ -65,4 +73,12 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+//Startup တွင် Auto-Migration ထည့်ခြင်း
+
+//Neon Cloud DB ထဲမှာ Table တွေ အလိုအလျောက် ဆောက်သွားအောင် Program.cs ၏ app.Run(); မတိုင်မီ အောက်ပါ Code လေး ထည့်ပေးပါ:
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.Migrate();
+}
 app.Run();
