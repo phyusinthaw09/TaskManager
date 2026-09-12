@@ -78,7 +78,16 @@ app.MapControllers();
 //Neon Cloud DB ထဲမှာ Table တွေ အလိုအလျောက် ဆောက်သွားအောင် Program.cs ၏ app.Run(); မတိုင်မီ အောက်ပါ Code လေး ထည့်ပေးပါ:
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    dbContext.Database.Migrate();
+    var services = scope.ServiceProvider;
+    try
+    {
+        var dbContext = services.GetRequiredService<AppDbContext>();
+        dbContext.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while migrating the database.");
+    }
 }
 app.Run();
