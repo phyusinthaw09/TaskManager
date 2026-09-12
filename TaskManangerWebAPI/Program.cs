@@ -2,8 +2,12 @@
 using TaskManangerWebAPI.Data;
 using Scalar.AspNetCore;
 var builder = WebApplication.CreateBuilder(args);
+//builder.Services.AddDbContext<AppDbContext>(options =>
+//    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// မူလ SQL Server သို့မဟုတ် UseSqlServer ရေးထားသည်ကို ခေတ္တ ပိတ်/ပြောင်းပါ
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseInMemoryDatabase("TaskManagerDb"));
 
 // --- CORS Policy ထည့်သွင်းခြင်း (စတင်ရန်) ---
 //builder.Services.AddCors(options =>
